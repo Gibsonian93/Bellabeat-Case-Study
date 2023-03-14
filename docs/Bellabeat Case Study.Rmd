@@ -1,0 +1,181 @@
+---
+title: "Bellabeat Case Study"
+author: "Brandon Gibson"
+date: "2023-03-01"
+output: html_document
+---
+## This case study follows the six step data analysis process:
+* Ask
+* Prepare
+* Process
+* Analyze
+* Share
+* Act
+
+## 1. Ask
+Business Task: Analyze Fitbit data to gain insight and help guide marketing strategy for Bellabeat to grow as a global player.
+
+
+## 2. Prepare
+Data can be found on [Kaggle](https://www.kaggle.com/arashnic/fitbit).
+The notebook consist of 18 data sets.
+To determine the credibility and integrity of the data, I will use the "ROCCC" system.
+
+#### 2a. Reliability
+* This data is low on being reliable. The data sample size only consist of 30 participants. This can limit the amount of analysis that can be done.
+
+#### 2b. Originality
+* This data is  on originality as the participants who submitted data were the company's participants.
+
+#### 2c. Comprehensiveness
+* This data is medium on comprehensiveness the data collected match parameters that Bellabeat needs. Having more data on the participants (age, race, health status) would greatly improve any analysis report we produce.
+
+#### 2d. Current
+* This data is low on current. The data is 5 years old. In that time, more knowledge about health and exercise have come out which can make some of the analysis obsolete.
+
+#### 2e. Cited
+* This data is low on cited. The data was collected through third party making the cited unknown.
+
+## 3. Process
+
+### Setting up my enviornment
+Notes: setting up my environment by installing and loading the 'tidyverse', 'skimr', 'plotly', 'dplyr', and 'ggplot2'  package
+
+```{r loading packages}
+install.packages('tidyverse')
+install.packages('skimr')
+install.packages('plotly')
+install.packages('dplyr')
+install.packages('ggplot2')
+library(tidyverse)
+library(skimr)
+library(plotly)
+library(ggplot2)
+library(readr)
+library(dplyr)
+
+```
+
+### Importing Data Sets
+Notes: The Daily Activity and Sleep Day data sets have been selected for our data analysis
+```{r importing data sets}
+# Import the DailyActivity and SleepDay data sets
+daily_activity <- read.csv("Fitabase/dailyActivity_merged.csv")
+sleep_activity <- read.csv("Fitabase/sleepDay_merged.csv")
+
+
+```
+
+### Inspecting and Cleaning Data Sets
+Notes: I will check for NA values in the data sets and remove them 
+```{r inspecting data sets}
+
+head(daily_activity)
+head(sleep_activity)
+# Inspecting column names
+colnames(daily_activity)
+colnames(sleep_activity)
+
+# Checking the total number of users for each data set. We see we have 33 IDs for daily_activity and 24 IDs for sleep_activity
+n_distinct(daily_activity$Id)
+n_distinct(sleep_activity$Id)
+
+# Checking for duplicate entries
+nrow(daily_activity[duplicated(daily_activity),])
+nrow(sleep_activity[duplicated(sleep_activity),])
+
+#Removing duplicated entries
+sleep_activity <- unique(sleep_activity)
+
+```
+
+### Transform Data Sets
+Notes: I will transform data in the data sets to help  with visualizing the data
+```{r transofrming data}
+# Separate the day and time in sleep_activity
+sleep_activity <- sleep_activity %>% separate(SleepDay, c("Date", "Time"), " ")
+
+# Create a weekday column for daily_activity
+daily_activity <- daily_activity %>% mutate(Weekday = weekdays(as.Date(ActivityDate, "%m/%d/%Y")))
+
+# Putting the weekdays in order From Monday thru Sunday
+daily_activity$Weekday <-factor(daily_activity$Weekday, levels= c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+
+```
+
+## 4. Analyse
+```{r Data Analysis}
+# Given summary of each data set
+daily_activity %>% select(TotalSteps, TotalDistance, SedentaryMinutes, LightlyActiveMinutes, FairlyActiveMinutes, VeryActiveMinutes, Calories) %>% summary()
+
+sleep_activity %>% select(TotalSleepRecords, TotalMinutesAsleep, TotalTimeInBed) %>% summary()
+
+```
+## 5. Share
+### Creating Visualizations
+#### Graph 1: TotalSteps vs Weekday
+This graph shows the days users recorded the most steps.
+```{r TotalSteps vs Weekday}
+# Bar graph on how many steps users recorded throughout the week
+ggplot(data=daily_activity, aes(x=Weekday, y=TotalSteps, fill=Weekday))+ 
+    geom_bar(stat = "identity") + labs(title = 'Total Steps Recorded', subtitle = "Users' steps are categorized by the day of the week. ", x= 'Day of the Week', y = 'Total Steps')
+```
+
+This graph shows users recorded the most steps during the weekday (Tuesday - THursday). This may be due to their occupation (nurse or kitchen worker) or way of transportation.
+
+#### Graph 2: Percentage of Activity Levels
+This graph shows the users total activity levels throughout their recording.
+```{r Percentage of Activity  Levels}
+# Pie Chart to compare the users' activity levels
+
+# Calculating the total minutes of activity
+total_minutes <- sum(daily_activity$VeryActiveMinutes, daily_activity$FairlyActiveMinutes,daily_activity$LightlyActiveMinutes, daily_activity$SedentaryMinutes)
+
+# Calculating the percentage of each activity level
+active_minutes_percentage <- sum(daily_activity$VeryActiveMinutes)/total_minutes*100
+fairlyActive_minutes_percentage <- sum(daily_activity$FairlyActiveMinutes)/total_minutes*100
+lightlyActive_minutes_percentage <- sum(daily_activity$LightlyActiveMinutes)/total_minutes*100
+sedentary_minutes_percentage <- sum(daily_activity$SedentaryMinutes)/total_minutes*100
+
+# Creating a pie chart visualization with plotly
+percentage <- data.frame(
+  level = c("Sedentary", "Lightly", "Fairly", "Very Active"),
+  minutes = c(sedentary_minutes_percentage,lightlyActive_minutes_percentage,fairlyActive_minutes_percentage,active_minutes_percentage)
+)
+
+plot_ly(percentage, labels = ~level, values = ~minutes, type = 'pie', textposition = 'outside', textinfo = 'label+percent') %>% layout(title = 'Activity Level Minutes', xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE), yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+```
+We see that users spend 81% of their day in a sedentary level. 29% of the time is recorded as some form of activity.
+
+#### Graph 3: Very Active Minutes vs Calories
+This graph shows a scatter plot and the correlation between the users' recording of very active minutes and calories burned
+```{r Active Minutes vs Calories}
+# Create a scatter plot to show the relationship between Very Active Minutes and Calories
+ggplot(data = daily_activity) + geom_point(mapping = aes(x = VeryActiveMinutes, y = Calories)) + geom_smooth(mapping = aes(x = VeryActiveMinutes, y = Calories)) + labs(title = "Very Active Minutes vs Calories Burned", x = "Active Minutes", y = "Calories Burned")
+
+```
+We see there is a direct correlation between the very active minutes and calories burned. The more active minutes a user records, the more calories they burn.
+
+#### Graph 4: Total Steps vs Calories
+This graph shows to see if there is a correlation between the numnber of steps the users took versus the total amount of calories burned.
+```{r Steps vs Calories}
+# Create a scatter plot to show the relationship between calories and steps
+ggplot(data = daily_activity)+ geom_smooth(mapping = aes(x = TotalSteps, y = Calories)) + geom_point(mapping = aes(x = TotalSteps, y = Calories)) + labs(title = "Calories vs Total Steps")
+```
+
+
+
+#### Graph 5: Time in Bed vs Time Asleep
+This graph shows the correlation between time in bed and minutes asleep.
+
+```{r Time in Bed vs Time Asleep}
+# Create a scatter plot showing the correlation between time in bed and minutes asleep
+ggplot(data = sleep_activity, aes(x=TotalMinutesAsleep, y = TotalTimeInBed)) + geom_smooth(mapping = aes(x = TotalMinutesAsleep, y = TotalTimeInBed)) + geom_point() + labs(title = "Sleep vs Time in Bed", x = "Total Minutes Asleep", y = "Total Time in Bed")
+```
+
+## 6. Act
+### Recommendations for Bellabeat Marketing Team:
+1. We see that with more active minutes the user has, the user will burn more calories. Bellabeat should send notifications about staying active and reward users for recording activities. 
+2. We also see that more steps a user takes, the more calories are burned. Bellabeat should make goals with steps alone that users can achieve through tracking their steps.
+3. Users are showing a healthy level of sleep. Bellabeat should give a notification for keeping a consistent sleep schedule.
+4. From the pie chart users are normally in a sedentary state. Bellabeat should push notifications more throughtout the day to inform people to stay active. 
