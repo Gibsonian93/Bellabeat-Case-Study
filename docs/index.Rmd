@@ -25,21 +25,21 @@ To determine the credibility and integrity of the data, I will use the "ROCCC" s
 * This data is low on being reliable. The data sample size only consist of 30 participants. This can limit the amount of analysis that can be done.
 
 #### 2b. Originality
-* This data is  on originality as the participants who submitted data were the company's participants.
+* This data is low on originality as the participants who submitted data, were participants of fitbit..
 
 #### 2c. Comprehensiveness
-* This data is medium on comprehensiveness the data collected match parameters that Bellabeat needs. Having more data on the participants (age, race, health status) would greatly improve any analysis report we produce.
+* This data is considered medium comprehensiveness. The data collected matches parameters that Bellabeat needs. Having more data on the participants (age, race, health status) would greatly improve any analysis report produced.
 
 #### 2d. Current
 * This data is low on current. The data is 5 years old. In that time, more knowledge about health and exercise have come out which can make some of the analysis obsolete.
 
 #### 2e. Cited
-* This data is low on cited. The data was collected through third party making the cited unknown.
+* This data is low on cited. The data was collected through a third party making the cited unknown.
 
 ## 3. Process
 
 ### Setting up my enviornment
-Notes: setting up my environment by installing and loading the 'tidyverse', 'skimr', 'plotly', 'dplyr', and 'ggplot2'  package
+Notes: setting up my environment by installing and loading the 'tidyverse', 'skimr', 'plotly', 'dplyr', and 'ggplot2'  packages
 
 ```{r loading packages}
 install.packages('tidyverse')
@@ -57,7 +57,7 @@ library(dplyr)
 ```
 
 ### Importing Data Sets
-Notes: The Daily Activity and Sleep Day data sets have been selected for our data analysis
+Notes: The "Daily Activity" and "Sleep Day" data sets have been selected for our data analysis
 ```{r importing data sets}
 # Import the DailyActivity and SleepDay data sets
 daily_activity <- read.csv("Fitabase/dailyActivity_merged.csv")
@@ -121,10 +121,10 @@ ggplot(data=daily_activity, aes(x=Weekday, y=TotalSteps, fill=Weekday))+
     geom_bar(stat = "identity") + labs(title = 'Total Steps Recorded', subtitle = "Users' steps are categorized by the day of the week. ", x= 'Day of the Week', y = 'Total Steps')
 ```
 
-This graph shows users recorded the most steps during the weekday (Tuesday - THursday). This may be due to their occupation (nurse or kitchen worker) or way of transportation.
+This graph that shows users recorded the most steps during the weekday (Tuesday - Thursday). This may be due to their occupation (nurse or kitchen worker) or way of transportation.
 
 #### Graph 2: Percentage of Activity Levels
-This graph shows the users total activity levels throughout their recording.
+This graph shows the user's total activity levels throughout their recording.
 ```{r Percentage of Activity  Levels}
 # Pie Chart to compare the users' activity levels
 
@@ -145,19 +145,20 @@ percentage <- data.frame(
 
 plot_ly(percentage, labels = ~level, values = ~minutes, type = 'pie', textposition = 'outside', textinfo = 'label+percent') %>% layout(title = 'Activity Level Minutes', xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE), yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
-We see that users spend 81% of their day in a sedentary level. 29% of the time is recorded as some form of activity.
+We see that users spend 81% of their day at a sedentary level. We found that 29% of the time recorded as some form of activity.
 
 #### Graph 3: Very Active Minutes vs Calories
 This graph shows a scatter plot and the correlation between the users' recording of very active minutes and calories burned
 ```{r Active Minutes vs Calories}
 # Create a scatter plot to show the relationship between Very Active Minutes and Calories
 ggplot(data = daily_activity) + geom_point(mapping = aes(x = VeryActiveMinutes, y = Calories)) + geom_smooth(mapping = aes(x = VeryActiveMinutes, y = Calories)) + labs(title = "Very Active Minutes vs Calories Burned", x = "Active Minutes", y = "Calories Burned")
-
+  
 ```
+
 We see there is a direct correlation between the very active minutes and calories burned. The more active minutes a user records, the more calories they burn.
 
 #### Graph 4: Total Steps vs Calories
-This graph shows to see if there is a correlation between the numnber of steps the users took versus the total amount of calories burned.
+This graph shows if there is a correlation between the number of steps the users took versus the total amount of calories burned.
 ```{r Steps vs Calories}
 # Create a scatter plot to show the relationship between calories and steps
 ggplot(data = daily_activity)+ geom_smooth(mapping = aes(x = TotalSteps, y = Calories)) + geom_point(mapping = aes(x = TotalSteps, y = Calories)) + labs(title = "Calories vs Total Steps")
@@ -176,6 +177,6 @@ ggplot(data = sleep_activity, aes(x=TotalMinutesAsleep, y = TotalTimeInBed)) + g
 ## 6. Act
 ### Recommendations for Bellabeat Marketing Team:
 1. We see that with more active minutes the user has, the user will burn more calories. Bellabeat should send notifications about staying active and reward users for recording activities. 
-2. We also see that more steps a user takes, the more calories are burned. Bellabeat should make goals with steps alone that users can achieve through tracking their steps.
-3. Users are showing a healthy level of sleep. Bellabeat should give a notification for keeping a consistent sleep schedule.
-4. From the pie chart users are normally in a sedentary state. Bellabeat should push notifications more throughtout the day to inform people to stay active. 
+2. We also see that the more steps a user takes, more calories are burned. Bellabeat should make goals with steps alone that users can achieve through tracking their steps.
+3. Users are showing a healthy level of sleep. Bellabeat should give a notification so the user will keep a consistent sleep schedule.
+4. From the pie chart, users are normally in a sedentary state. Bellabeat should push notifications more throughtout the day to inform people to stay active. 
